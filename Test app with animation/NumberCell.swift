@@ -33,6 +33,11 @@ final class NumberCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        numberLabel.text = nil
+    }
 }
 
 //MARK: - Constraints

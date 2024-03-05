@@ -9,9 +9,9 @@ import UIKit
 
 final class ViewController: UIViewController {
     private let verticalListTableView = UITableView()
-    
     private var randomLists: [[Int]] = []
-    
+    private var timer: Timer?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(verticalListTableView)
@@ -24,9 +24,11 @@ final class ViewController: UIViewController {
         
         generateRandomLists()
         
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            self?.updateRandomNumbers()
-        }
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateRandomNumbers), userInfo: nil, repeats: true)
+    }
+    
+    deinit {
+        timer?.invalidate()
     }
 }
 
@@ -55,16 +57,21 @@ private extension ViewController {
         verticalListTableView.reloadData()
     }
     
-    func updateRandomNumbers() {
+    @objc func updateRandomNumbers() {
         for index in randomLists.indices {
             guard let randomIndex = randomLists[index].indices.randomElement() else {
                 continue
             }
             randomLists[index][randomIndex] = Int.random(in: 0...100)
-            verticalListTableView.reloadData()
+            let indexPath = IndexPath(row: index, section: 0)
+            if let cell = verticalListTableView.cellForRow(at: indexPath) as? HorizontalListCell {
+                cell.numbers = randomLists[index]
+            }
         }
     }
+
 }
+
 //MARK: - VC dataSource
 extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -77,4 +84,3 @@ extension ViewController: UITableViewDataSource {
         return cell
     }
 }
-
