@@ -28,6 +28,7 @@ final class NumberCell: UICollectionViewCell {
         contentView.layer.cornerRadius = 8
         contentView.layer.borderWidth = 1
         contentView.layer.borderColor = UIColor.black.cgColor
+        
     }
     
     required init?(coder: NSCoder) {

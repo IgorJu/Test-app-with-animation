@@ -11,7 +11,7 @@ final class ViewController: UIViewController {
     private let verticalListTableView = UITableView()
     private var randomLists: [[Int]] = []
     private var timer: Timer?
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(verticalListTableView)
@@ -69,7 +69,6 @@ private extension ViewController {
             }
         }
     }
-
 }
 
 //MARK: - VC dataSource
@@ -81,6 +80,7 @@ extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "HorizontalListCell", for: indexPath) as! HorizontalListCell
         cell.numbers = randomLists[indexPath.row]
+        
         return cell
     }
 }

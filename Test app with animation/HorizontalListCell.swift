@@ -10,9 +10,13 @@ import UIKit
 final class HorizontalListCell: UITableViewCell {
     var numbers: [Int] = [] {
         didSet {
-            collectionView.reloadData()
+            if !isLongPressing {
+                collectionView.reloadData()
+            }
         }
     }
+    
+    private var isLongPressing = false
     
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -25,13 +29,13 @@ final class HorizontalListCell: UITableViewCell {
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.dataSource = self
-        collectionView.delegate = self
         collectionView.register(NumberCell.self, forCellWithReuseIdentifier: "NumberCell")
         return collectionView
     }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupLongPressGesture()
         contentView.addSubview(collectionView)
         setConstraints()
     }
@@ -45,6 +49,37 @@ final class HorizontalListCell: UITableViewCell {
         numbers = []
     }
 }
+
+private extension HorizontalListCell {
+    func setupLongPressGesture() {
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(gesture:)))
+        collectionView.addGestureRecognizer(longPressGesture)
+    }
+    
+    @objc func handleLongPress(gesture: UILongPressGestureRecognizer) {
+        guard let targetIndexPath = collectionView.indexPathForItem(at: gesture.location(in: collectionView)) else { return }
+        
+        switch gesture.state {
+        case .began:
+            isLongPressing = true
+            animateCell(at: targetIndexPath, scale: 0.8)
+        case .ended, .cancelled:
+            isLongPressing = false
+            animateCell(at: targetIndexPath, scale: 1.0)
+        default:
+            break
+        }
+    }
+    
+    func animateCell(at indexPath: IndexPath, scale: CGFloat) {
+        UIView.animate(withDuration: 0.2) {
+            if let cell = self.collectionView.cellForItem(at: indexPath) {
+                cell.transform = CGAffineTransform(scaleX: scale, y: scale)
+            }
+        }
+    }
+}
+
 
 //MARK: - Setup UI
 private extension HorizontalListCell {
@@ -68,18 +103,5 @@ extension HorizontalListCell: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "NumberCell", for: indexPath) as! NumberCell
         cell.number = numbers[indexPath.item]
         return cell
-    }
-}
-
-extension HorizontalListCell: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        collectionView.deselectItem(at: indexPath, animated: true)
-        UIView.animate(withDuration: 0.2) {
-            collectionView.cellForItem(at: indexPath)?.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
-        } completion: { _ in
-            UIView.animate(withDuration: 0.2) {
-                collectionView.cellForItem(at: indexPath)?.transform = .identity
-            }
-        }
     }
 }
